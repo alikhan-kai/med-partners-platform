@@ -179,16 +179,38 @@ public class ParsingService {
 
     /**
      * Maps our ParsedDocument domain model to the PriceUploadRequest DTO.
+     * С добавлением встроенной дедупликации строк по ТЗ 4.4
      */
     private PriceUploadRequest mapToUploadRequest(ParsedDocument doc, UUID partnerId, String fileName) {
         List<PriceUploadRequest.ParsedItemDto> itemDtos = new ArrayList<>();
 
+        // Хранилище для отслеживания уже добавленных уникальных комбинаций
+        java.util.Set<String> seenItems = new java.util.HashSet<>();
+
         for (PriceItem item : doc.items()) {
+            // Безопасно вытаскиваем и очищаем значения от лишних пробелов
+            String rawName = item.serviceNameRaw() != null ? item.serviceNameRaw().trim() : "";
+            String rawCode = item.serviceCode() != null ? item.serviceCode().trim() : "";
+
+            // Если название пустое — по ТЗ 4.4 пропускаем строку
+            if (rawName.isEmpty() || rawName.equalsIgnoreCase("nan")) {
+                continue;
+            }
+
+            // Уникальный ключ позиции (Нижний регистр, чтобы исключить дубли из-за РЕГИСТРА букв)
+            String uniqueKey = rawCode.toLowerCase() + "_" + rawName.toLowerCase();
+
+            // Если такой ключ уже встречался в файле — пропускаем (Дедупликация)
+            if (!seenItems.add(uniqueKey)) {
+                log.debug("Дубликат позиции пропущен в файле {}: Код: {}, Название: {}", fileName, rawCode, rawName);
+                continue;
+            }
+
             PriceUploadRequest.ParsedItemDto itemDto = PriceUploadRequest.ParsedItemDto.builder()
-                    .serviceNameRaw(item.serviceNameRaw())
-                    .serviceCodeSource(item.serviceCode())
+                    .serviceNameRaw(rawName)
+                    .serviceCodeSource(rawCode.isEmpty() ? null : rawCode)
                     .priceResidentKzt(item.residentPrice())
-                    .priceNonresidentKzt(item.nonResidentPrice())
+                    .priceNonresidentKzt(item.nonResidentPrice() != null ? item.nonResidentPrice() : item.residentPrice())
                     .priceOriginal(item.residentPrice())
                     .currencyOriginal(item.currency() != null ? item.currency() : "KZT")
                     .build();
@@ -196,6 +218,9 @@ public class ParsingService {
         }
 
         String format = extractFormat(fileName);
+
+        log.info("Фильтрация дубликатов в '{}': изначальных строк {}, уникальных сохраненно {}",
+                fileName, doc.items().size(), itemDtos.size());
 
         return PriceUploadRequest.builder()
                 .partnerId(partnerId)
