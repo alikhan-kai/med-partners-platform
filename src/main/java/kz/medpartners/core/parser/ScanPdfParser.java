@@ -143,7 +143,7 @@ public class ScanPdfParser implements PriceParser {
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private static final String GEMINI_API_KEY = "AQ.Ab8RN6KwbiqRxhQslhz9Bhr3wUUL5vqUJF_akwjuz44P1LaH_w";
+    private static final String GEMINI_API_KEY = "";
     private static final String GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + GEMINI_API_KEY;
 
     @Override
