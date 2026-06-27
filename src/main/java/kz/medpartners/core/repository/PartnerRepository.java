@@ -15,4 +15,6 @@ public interface PartnerRepository extends JpaRepository<PartnerEntity, UUID> {
     // Явный JPQL-запрос, который на 100% проигнорирует имя метода и выполнит чистый SQL
     @Query("SELECT p FROM PartnerEntity p WHERE p.city = :city AND p.is_active = :isActive")
     List<PartnerEntity> findAllByCityAndIsActiveCustom(@Param("city") String city, @Param("isActive") Boolean isActive);
+
+    java.util.Optional<PartnerEntity> findByNameIgnoreCase(String name);
 }
