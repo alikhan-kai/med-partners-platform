@@ -37,13 +37,15 @@ public class DocumentProcessingService {
 
         // 2. Создаем запись о документе
         UUID docId = UUID.randomUUID();
+
+        // ИСПРАВЛЕНО: методы билдера теперь используют camelCase (.docId, .fileName, .fileFormat, .effectiveDate, .parseStatus)
         PriceDocumentEntity document = PriceDocumentEntity.builder()
-                .doc_id(docId)
+                .docId(docId)
                 .partner(partner)
-                .file_name(request.getFileName())
-                .file_format(request.getFileFormat())
-                .effective_date(request.getEffectiveDate())
-                .parse_status("processing")
+                .fileName(request.getFileName())
+                .fileFormat(request.getFileFormat())
+                .effectiveDate(request.getEffectiveDate())
+                .parseStatus("processing")
                 .build();
 
         priceDocumentRepository.save(document);
@@ -123,12 +125,13 @@ public class DocumentProcessingService {
         }
 
         // 4. Обновляем финальный статус документа
+        // ИСПРАВЛЕНО: сеттеры теперь вызываются в camelCase (setParseStatus, setParseLog)
         if (hasAnomaly) {
-            document.setParse_status("needs_review");
+            document.setParseStatus("needs_review");
         } else {
-            document.setParse_status("done");
+            document.setParseStatus("done");
         }
-        document.setParse_log(logBuilder.toString());
+        document.setParseLog(logBuilder.toString());
         priceDocumentRepository.save(document);
 
         return docId;
