@@ -363,24 +363,6 @@ curl -X POST http://localhost:8080/api/v1/documents/upload-zip \
   -F "file=@/path/to/prices.zip"
 ```
 
----
-
-## Конфигурация
-
-Все параметры задаются в `src/main/resources/application.properties`:
-
-| Параметр | По умолчанию | Описание |
-|---|---|---|
-| `spring.datasource.url` | `jdbc:postgresql://localhost:5432/postgres` | URL базы данных |
-| `spring.datasource.username` | `postgres` | Пользователь БД |
-| `spring.datasource.password` | `1234` | Пароль БД |
-| `spring.jpa.hibernate.ddl-auto` | `update` | Стратегия миграции схемы |
-| `spring.jpa.show-sql` | `true` | Логирование SQL-запросов |
-| `server.port` | `8080` | Порт приложения |
-| `TESSDATA_PREFIX` (env) | системный | Путь к языковым пакетам Tesseract |
-
----
-
 ## Тесты
 
 ```bash
